@@ -2,6 +2,7 @@ package com.auth.server.contoller;
 
 import com.auth.server.model.User;
 import com.auth.server.repository.UserRepository;
+import com.auth.server.service.AuthService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,20 +24,19 @@ import java.util.Objects;
 @RequestMapping(value = "/api/v1/authentication")
 public class AuthController {
 
-    public final UserRepository userRepository;
+    public final AuthService authService;
 
     @Autowired
-    public AuthController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
+
 
     @PostMapping("/register")
     public RegisterResponse register(@RequestBody @Valid RegisterRequest registerRequest) {
-        if (!Objects.equals(registerRequest.password, registerRequest.passwordConfirm)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password not match");
-        }
 
-        var user = userRepository.save(User.of(registerRequest.firstName, registerRequest.lastName, registerRequest.email, registerRequest.password));
+
+        var user = authService.register(registerRequest.firstName, registerRequest.lastName, registerRequest.email, registerRequest.password, registerRequest.passwordConfirm);
         return new RegisterResponse(user.getFirstName(), user.getLastName(), user.getEmail());
     }
 
