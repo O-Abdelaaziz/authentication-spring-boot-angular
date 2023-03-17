@@ -2,10 +2,14 @@ package com.auth.server.contoller;
 
 import com.auth.server.model.User;
 import com.auth.server.repository.UserRepository;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.Objects;
 
 /**
  * @Created 17/03/2023 - 09:17
@@ -26,13 +30,28 @@ public class AuthController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "hello!";
+    @PostMapping("/register")
+    public RegisterResponse register(@RequestBody @Valid RegisterRequest registerRequest) {
+        if (!Objects.equals(registerRequest.password, registerRequest.passwordConfirm)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password not match");
+        }
+
+        var user = userRepository.save(User.of(registerRequest.firstName, registerRequest.lastName, registerRequest.email, registerRequest.password));
+        return new RegisterResponse(user.getFirstName(), user.getLastName(), user.getEmail());
     }
 
-    @PostMapping("/register")
-    public User register(@RequestBody @Valid User user) {
-        return userRepository.save(user);
+
+    record RegisterRequest(@JsonProperty("first_name") String firstName,
+                           @JsonProperty("last_name") String lastName,
+                           String email,
+                           String password,
+                           @JsonProperty("password_confirm") String passwordConfirm
+    ) {
+    }
+
+    record RegisterResponse(@JsonProperty("first_name") String firstName,
+                            @JsonProperty("last_name") String lastName,
+                            String email
+    ) {
     }
 }
