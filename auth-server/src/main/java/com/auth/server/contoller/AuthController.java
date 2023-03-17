@@ -3,6 +3,7 @@ package com.auth.server.contoller;
 import com.auth.server.model.User;
 import com.auth.server.repository.UserRepository;
 import com.auth.server.service.AuthService;
+import com.auth.server.service.Token;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,8 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid LoginRequest loginRequest) {
         var user = authService.login(loginRequest.email, loginRequest.password);
-        return new LoginResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+        var token = Token.of(user.getId(), 10L, "5be9fe04d9609a9fadc87be7d30032a4");
+        return new LoginResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), token.getToken());
     }
 
     record RegisterRequest(@JsonProperty("first_name") String firstName,
@@ -64,7 +66,8 @@ public class AuthController {
     record LoginResponse(Long id,
                          @JsonProperty("first_name") String firstName,
                          @JsonProperty("last_name") String lastName,
-                         String email
+                         String email,
+                         String token
     ) {
     }
 }

@@ -7,4 +7,5 @@ create table if not exists users (
     PRIMARY KEY (id)
 );
 
-alter table if exists users add constraint uq_email unique (email);
+-- alter table if exists users add constraint uq_email unique (email);
+ALTER TABLE users ADD CONSTRAINT IF NOT EXISTS email_unique UNIQUE (email);

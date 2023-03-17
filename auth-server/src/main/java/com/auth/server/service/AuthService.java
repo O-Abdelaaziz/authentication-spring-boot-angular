@@ -52,7 +52,7 @@ public class AuthService {
 
     public User login(String email, String password) {
         var user = userRepository.findByEmail(email).orElseThrow(InvalidCredentialsError::new);
-        if (passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsError();
         }
         return user;

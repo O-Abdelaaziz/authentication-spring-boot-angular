@@ -24,6 +24,7 @@ import javax.validation.constraints.NotBlank;
 public class User {
 
     @Id
+    @Column("id")
     private Long id;
 
     @NotBlank(message = "First name can't be empty")
