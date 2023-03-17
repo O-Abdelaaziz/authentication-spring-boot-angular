@@ -6,3 +6,5 @@ create table if not exists users (
     password varchar (255) not null,
     PRIMARY KEY (id)
 );
+
+alter table if exists users add constraint uq_email unique (email);
