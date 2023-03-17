@@ -1,5 +1,5 @@
 create table if not exists users (
-    id int not null,
+    id int not null AUTO_INCREMENT,
     first_name varchar (255) not null,
     last_name varchar (255) not null,
     email varchar (255) not null,
