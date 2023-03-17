@@ -3,6 +3,10 @@ package com.auth.server.model;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
+import org.springframework.data.relational.core.mapping.Column;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 /**
  * @Created 17/03/2023 - 08:58
@@ -19,9 +23,22 @@ public class User {
 
     @Id
     private Long id;
+
+    @NotBlank(message = "First name can't be empty")
+    @Column("first_name")
     private String firstName;
+
+    @NotBlank(message = "Last name can't be empty")
+    @Column("last_name")
     private String lastName;
+
+    @NotBlank(message = "email can't be empty")
+    @Email(message = "email not valid")
+    @Column("email")
     private String email;
+
+    @NotBlank(message = "password can't be empty")
+    @Column("password")
     private String password;
 
     public static User of(String firstName, String lastName, String email, String password) {

@@ -20,7 +20,9 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeRequests()
+        httpSecurity
+                .csrf().disable()
+                .authorizeRequests()
                 .antMatchers("/**")
                 .permitAll();
         return httpSecurity.build();
