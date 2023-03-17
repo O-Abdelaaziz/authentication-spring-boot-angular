@@ -38,4 +38,12 @@ public class AuthService {
 
         return userRepository.save(User.of(firstName, lastName, email, passwordEncoder.encode(password)));
     }
+
+    public User login(String email, String password) {
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "email not found"));
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password not match");
+        }
+        return user;
+    }
 }

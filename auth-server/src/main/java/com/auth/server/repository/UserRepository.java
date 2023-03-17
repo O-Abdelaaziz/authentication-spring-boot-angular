@@ -4,6 +4,8 @@ import com.auth.server.model.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * @Created 17/03/2023 - 09:15
  * @Package com.auth.server.repository
@@ -14,4 +16,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
+    Optional<User> findByEmail(String email);
 }

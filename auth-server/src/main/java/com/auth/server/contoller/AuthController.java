@@ -34,12 +34,15 @@ public class AuthController {
 
     @PostMapping("/register")
     public RegisterResponse register(@RequestBody @Valid RegisterRequest registerRequest) {
-
-
         var user = authService.register(registerRequest.firstName, registerRequest.lastName, registerRequest.email, registerRequest.password, registerRequest.passwordConfirm);
         return new RegisterResponse(user.getFirstName(), user.getLastName(), user.getEmail());
     }
 
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody @Valid LoginRequest loginRequest) {
+        var user = authService.login(loginRequest.email, loginRequest.password);
+        return new LoginResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+    }
 
     record RegisterRequest(@JsonProperty("first_name") String firstName,
                            @JsonProperty("last_name") String lastName,
@@ -52,6 +55,16 @@ public class AuthController {
     record RegisterResponse(@JsonProperty("first_name") String firstName,
                             @JsonProperty("last_name") String lastName,
                             String email
+    ) {
+    }
+
+    record LoginRequest(String email, String password) {
+    }
+
+    record LoginResponse(Long id,
+                         @JsonProperty("first_name") String firstName,
+                         @JsonProperty("last_name") String lastName,
+                         String email
     ) {
     }
 }
