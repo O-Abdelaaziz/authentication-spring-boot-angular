@@ -61,6 +61,11 @@ public class AuthController {
         return new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
     }
 
+    @PostMapping(value = "/refresh")
+    public RefreshResponse refresh(@CookieValue("refresh_token") String refreshToken) {
+        return new RefreshResponse(authService.refreshAccess(refreshToken).getAccessToken().getToken());
+    }
+
     record RegisterRequest(@JsonProperty("first_name") String firstName,
                            @JsonProperty("last_name") String lastName,
                            String email,
@@ -90,5 +95,8 @@ public class AuthController {
                         @JsonProperty("last_name") String lastName,
                         String email
     ) {
+    }
+
+    record RefreshResponse(String message) {
     }
 }

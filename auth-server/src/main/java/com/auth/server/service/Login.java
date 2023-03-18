@@ -35,4 +35,13 @@ public class Login {
                 Token.of(userId, 1440L, refreshSecret)
         );
     }
+
+    public static Login of(Long userId, String firstName, String lastName, String email, String accessSecret, Token refreshToken) {
+        return new Login(
+                firstName,
+                lastName,
+                email,
+                Token.of(userId, 1L, accessSecret),
+                refreshToken);
+    }
 }

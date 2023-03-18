@@ -40,6 +40,10 @@ public class Token {
         return new Token(token);
     }
 
+    public static Token of(String token) {
+        return new Token(token);
+    }
+
     public static Long from(String token, String secretKey) {
         return ((Claims) Jwts.parserBuilder()
                 .setSigningKey(Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8)))

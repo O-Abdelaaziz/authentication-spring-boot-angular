@@ -68,4 +68,11 @@ public class AuthService {
         return userRepository.findById(user)
                 .orElseThrow(UserNotFoundError::new);
     }
+
+    public Login refreshAccess(String refreshToken) {
+        var userId = Token.from(refreshToken, refreshTokenSecret);
+        var user = userRepository.findById(userId);
+        var login = Login.of(userId, user.get().getFirstName(), user.get().getLastName(), user.get().getEmail(), accessTokenSecret, Token.of(refreshToken));
+        return login;
+    }
 }
