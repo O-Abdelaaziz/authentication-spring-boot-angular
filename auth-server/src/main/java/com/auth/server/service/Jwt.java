@@ -1,7 +1,6 @@
 package com.auth.server.service;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Getter;
@@ -20,15 +19,15 @@ import java.util.Base64;
  * @Author Abdelaaziz Ouakala
  **/
 
-public class Token {
+public class Jtw {
     @Getter
     private final String token;
 
-    private Token(String token) {
+    private Jtw(String token) {
         this.token = token;
     }
 
-    public static Token of(Long userId, Long validityInMinutes, String secretKey) {
+    public static Jtw of(Long userId, Long validityInMinutes, String secretKey) {
         var issueDate = Instant.now();
         var token = Jwts.builder()
                 .claim("user_id", userId)
@@ -37,11 +36,11 @@ public class Token {
                 .setExpiration(Date.from(issueDate.plus(validityInMinutes, ChronoUnit.MINUTES)))
                 .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .compact();
-        return new Token(token);
+        return new Jtw(token);
     }
 
-    public static Token of(String token) {
-        return new Token(token);
+    public static Jtw of(String token) {
+        return new Jtw(token);
     }
 
     public static Long from(String token, String secretKey) {
