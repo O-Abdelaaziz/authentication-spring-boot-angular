@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Objects;
 
@@ -40,10 +42,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody @Valid LoginRequest loginRequest) {
-        var user = authService.login(loginRequest.email, loginRequest.password);
-        var token = Token.of(user.getId(), 10L, "5be9fe04d9609a9fadc87be7d30032a4");
-        return new LoginResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), token.getToken());
+    public LoginResponse login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
+        var login = authService.login(loginRequest.email, loginRequest.password);
+
+        Cookie cookie = new Cookie("refresh_token", login.getRefreshToken().getToken());
+        cookie.setMaxAge(3600);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/api");
+        httpServletResponse.addCookie(cookie);
+
+        return new LoginResponse(login.getFirstName(), login.getLastName(), login.getEmail(), login.getAccessToken().getToken());
     }
 
     record RegisterRequest(@JsonProperty("first_name") String firstName,
@@ -63,8 +71,7 @@ public class AuthController {
     record LoginRequest(String email, String password) {
     }
 
-    record LoginResponse(Long id,
-                         @JsonProperty("first_name") String firstName,
+    record LoginResponse(@JsonProperty("first_name") String firstName,
                          @JsonProperty("last_name") String lastName,
                          String email,
                          String token

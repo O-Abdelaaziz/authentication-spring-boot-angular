@@ -6,6 +6,7 @@ import com.auth.server.error.PasswordNotMatchError;
 import com.auth.server.model.User;
 import com.auth.server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,11 +28,14 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final String accessTokenSecret;
+    private final String refreshTokenSecret;
 
-    @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, @Value("${application.security.access.token.secret}") String accessTokenSecret, @Value("${application.security.refresh.token.secret}") String refreshTokenSecret) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.accessTokenSecret = accessTokenSecret;
+        this.refreshTokenSecret = refreshTokenSecret;
     }
 
     public User register(String firstName, String lastName, String email, String password, String passwordConfirm) {
@@ -50,11 +54,11 @@ public class AuthService {
         return user;
     }
 
-    public User login(String email, String password) {
+    public Login login(String email, String password) {
         var user = userRepository.findByEmail(email).orElseThrow(InvalidCredentialsError::new);
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsError();
         }
-        return user;
+        return Login.of(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), accessTokenSecret, refreshTokenSecret);
     }
 }
