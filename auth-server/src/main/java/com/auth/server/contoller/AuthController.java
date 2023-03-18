@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Objects;
@@ -54,6 +55,12 @@ public class AuthController {
         return new LoginResponse(login.getFirstName(), login.getLastName(), login.getEmail(), login.getAccessToken().getToken());
     }
 
+    @GetMapping(value = "/user")
+    public UserResponse user(HttpServletRequest request) {
+        var user = (User) request.getAttribute("user");
+        return new UserResponse(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+    }
+
     record RegisterRequest(@JsonProperty("first_name") String firstName,
                            @JsonProperty("last_name") String lastName,
                            String email,
@@ -75,6 +82,13 @@ public class AuthController {
                          @JsonProperty("last_name") String lastName,
                          String email,
                          String token
+    ) {
+    }
+
+    record UserResponse(Long id,
+                        @JsonProperty("first_name") String firstName,
+                        @JsonProperty("last_name") String lastName,
+                        String email
     ) {
     }
 }
