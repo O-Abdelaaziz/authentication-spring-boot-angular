@@ -66,6 +66,15 @@ public class AuthController {
         return new RefreshResponse(authService.refreshAccess(refreshToken).getAccessToken().getToken());
     }
 
+    @PostMapping(value = "/Logout")
+    public LogoutResponse logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("refresh_token",null);
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+        return new LogoutResponse("success");
+    }
+
     record RegisterRequest(@JsonProperty("first_name") String firstName,
                            @JsonProperty("last_name") String lastName,
                            String email,
@@ -98,5 +107,8 @@ public class AuthController {
     }
 
     record RefreshResponse(String message) {
+    }
+
+    record LogoutResponse(String message) {
     }
 }
