@@ -8,6 +8,8 @@ import lombok.Getter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 
@@ -19,36 +21,51 @@ import java.util.Base64;
  * @Author Abdelaaziz Ouakala
  **/
 
-public class Jtw {
+public class Jwt {
     @Getter
     private final String token;
+    @Getter
+    private final Long userId;
+    @Getter
+    private final LocalDateTime issuedAt;
+    @Getter
+    private final LocalDateTime expiredAt;
 
-    private Jtw(String token) {
+
+    public Jwt(String token, Long userId, LocalDateTime issuedAt, LocalDateTime expiredAt) {
         this.token = token;
+        this.userId = userId;
+        this.issuedAt = issuedAt;
+        this.expiredAt = expiredAt;
     }
 
-    public static Jtw of(Long userId, Long validityInMinutes, String secretKey) {
-        var issueDate = Instant.now();
+    public static Jwt of(Long userId, Long validityInMinutes, String secretKey) {
+        var issueAt = Instant.now();
+        var expiration = issueAt.plus(validityInMinutes, ChronoUnit.MINUTES);
         var token = Jwts.builder()
                 .claim("user_id", userId)
                 .setAudience("Authentication Server")
-                .setIssuedAt(Date.from(issueDate))
-                .setExpiration(Date.from(issueDate.plus(validityInMinutes, ChronoUnit.MINUTES)))
+                .setIssuedAt(Date.from(issueAt))
+                .setExpiration(Date.from(expiration))
                 .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .compact();
-        return new Jtw(token);
+        return new Jwt(token, userId, LocalDateTime.ofInstant(issueAt, ZoneId.systemDefault()), LocalDateTime.ofInstant(expiration, ZoneId.systemDefault()));
     }
 
-    public static Jtw of(String token) {
-        return new Jtw(token);
-    }
 
-    public static Long from(String token, String secretKey) {
-        return ((Claims) Jwts.parserBuilder()
+    public static Jwt from(String token, String secretKey) {
+
+        var claims = (Claims) Jwts.parserBuilder()
                 .setSigningKey(Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .build()
                 .parse(token)
-                .getBody())
-                .get("user_id", Long.class);
+                .getBody();
+
+        var userId = claims.get("user_id", Long.class);
+        var issuedAt = claims.getIssuedAt();
+        var expiration = claims.getExpiration();
+
+        return new Jwt(token, userId, LocalDateTime.ofInstant(Instant.ofEpochMilli(issuedAt.getTime()), ZoneId.systemDefault()), LocalDateTime.ofInstant(Instant.ofEpochMilli(expiration.getTime()), ZoneId.systemDefault()));
+
     }
 }

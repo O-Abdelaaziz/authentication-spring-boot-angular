@@ -6,13 +6,10 @@ import com.auth.server.error.PasswordNotMatchError;
 import com.auth.server.error.UserNotFoundError;
 import com.auth.server.model.User;
 import com.auth.server.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
 
@@ -64,15 +61,15 @@ public class AuthService {
     }
 
     public User getUserFromToken(String token) {
-        var user = Token.from(token, accessTokenSecret);
+        var user = Jwt.from(token, accessTokenSecret).getUserId();
         return userRepository.findById(user)
                 .orElseThrow(UserNotFoundError::new);
     }
 
     public Login refreshAccess(String refreshToken) {
-        var userId = Token.from(refreshToken, refreshTokenSecret);
-        var user = userRepository.findById(userId);
-        var login = Login.of(userId, user.get().getFirstName(), user.get().getLastName(), user.get().getEmail(), accessTokenSecret, Token.of(refreshToken));
+        var refreshJwt = Jwt.from(refreshToken, refreshTokenSecret);
+        var user = userRepository.findById(refreshJwt.getUserId());
+        var login = Login.of(refreshJwt.getUserId(), user.get().getFirstName(), user.get().getLastName(), user.get().getEmail(), accessTokenSecret, refreshJwt);
         return login;
     }
 }

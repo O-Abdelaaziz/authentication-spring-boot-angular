@@ -1,20 +1,15 @@
 package com.auth.server.contoller;
 
 import com.auth.server.model.User;
-import com.auth.server.repository.UserRepository;
 import com.auth.server.service.AuthService;
-import com.auth.server.service.Token;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Objects;
 
 /**
  * @Created 17/03/2023 - 09:17
@@ -46,13 +41,13 @@ public class AuthController {
     public LoginResponse login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse httpServletResponse) {
         var login = authService.login(loginRequest.email, loginRequest.password);
 
-        Cookie cookie = new Cookie("refresh_token", login.getRefreshToken().getToken());
+        Cookie cookie = new Cookie("refresh_token", login.getRefreshJwt().getToken());
         cookie.setMaxAge(3600);
         cookie.setHttpOnly(true);
         cookie.setPath("/api");
         httpServletResponse.addCookie(cookie);
 
-        return new LoginResponse(login.getFirstName(), login.getLastName(), login.getEmail(), login.getAccessToken().getToken());
+        return new LoginResponse(login.getFirstName(), login.getLastName(), login.getEmail(), login.getAccessJwt().getToken());
     }
 
     @GetMapping(value = "/user")
@@ -63,7 +58,7 @@ public class AuthController {
 
     @PostMapping(value = "/refresh")
     public RefreshResponse refresh(@CookieValue("refresh_token") String refreshToken) {
-        return new RefreshResponse(authService.refreshAccess(refreshToken).getAccessToken().getToken());
+        return new RefreshResponse(authService.refreshAccess(refreshToken).getAccessJwt().getToken());
     }
 
     @PostMapping(value = "/Logout")

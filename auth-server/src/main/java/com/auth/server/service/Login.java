@@ -15,15 +15,15 @@ public class Login {
     private final String firstName;
     private final String lastName;
     private final String email;
-    private final Token accessToken;
-    private final Token refreshToken;
+    private final Jwt accessJwt;
+    private final Jwt refreshJwt;
 
-    public Login(String firstName, String lastName, String email, Token accessToken, Token refreshToken) {
+    public Login(String firstName, String lastName, String email, Jwt accessJwt, Jwt refreshJwt) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
+        this.accessJwt = accessJwt;
+        this.refreshJwt = refreshJwt;
     }
 
     public static Login of(Long userId, String firstName, String lastName, String email, String accessSecret, String refreshSecret) {
@@ -31,17 +31,17 @@ public class Login {
                 firstName,
                 lastName,
                 email,
-                Token.of(userId, 1L, accessSecret),
-                Token.of(userId, 1440L, refreshSecret)
+                Jwt.of(userId, 1L, accessSecret),
+                Jwt.of(userId, 1440L, refreshSecret)
         );
     }
 
-    public static Login of(Long userId, String firstName, String lastName, String email, String accessSecret, Token refreshToken) {
+    public static Login of(Long userId, String firstName, String lastName, String email, String accessSecret, Jwt refreshJwt) {
         return new Login(
                 firstName,
                 lastName,
                 email,
-                Token.of(userId, 1L, accessSecret),
-                refreshToken);
+                Jwt.of(userId, 1L, accessSecret),
+                refreshJwt);
     }
 }
