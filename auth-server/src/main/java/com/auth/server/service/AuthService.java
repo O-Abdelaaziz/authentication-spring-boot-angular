@@ -3,6 +3,7 @@ package com.auth.server.service;
 import com.auth.server.error.EmailAlreadyExistsError;
 import com.auth.server.error.InvalidCredentialsError;
 import com.auth.server.error.PasswordNotMatchError;
+import com.auth.server.error.UserNotFoundError;
 import com.auth.server.model.User;
 import com.auth.server.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,5 +61,11 @@ public class AuthService {
             throw new InvalidCredentialsError();
         }
         return Login.of(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), accessTokenSecret, refreshTokenSecret);
+    }
+
+    public User getUserFromToken(String token) {
+        var user = Token.from(token, accessTokenSecret);
+        return userRepository.findById(user)
+                .orElseThrow(UserNotFoundError::new);
     }
 }
